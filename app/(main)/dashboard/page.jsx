@@ -2,8 +2,11 @@ import React from "react";
 import { CreateAccountDrawer } from "@/components/create-account-drawer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
+import { AccountCard } from "./_components/account-card";
+import { getUserAccounts } from "@/actions/dashboard";
 
 async function DashboardPage() {
+  const accounts = await getUserAccounts();
   return <div className="px-5">
      {/* Accounts Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -15,6 +18,10 @@ async function DashboardPage() {
             </CardContent>
           </Card>
         </CreateAccountDrawer>
+        {accounts.length > 0 &&
+          accounts?.map((account) => (
+            <AccountCard key={account.id} account={account} />
+          ))}
       </div>
   </div>;
 }
