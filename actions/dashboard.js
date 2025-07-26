@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/dist/types/server";
-
+import { auth } from "@clerk/nextjs/server"; 
+import { revalidatePath } from 'next/cache';
 const serializeTransaction = (obj) => {
   const serialized = { ...obj };
   if (obj.balance) {
@@ -20,7 +20,7 @@ export async function createAccount(data) {
     if (!userId) throw new Error("Unauthorized");
 
     const user = await db.user.findUnique({
-      where: { clerkUser: userId },
+      where: { clerkUserId: userId },
     });
 
     if (!user) {
