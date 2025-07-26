@@ -1,8 +1,9 @@
 "use client";
 
-import { useState} from "react";
+import { useState, useEffect} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import useFetch from "@/hooks/use-fetch";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -22,6 +23,9 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { accountSchema } from "@/app/lib/schema";
+import { Loader2 } from "lucide-react";
+import { createAccount } from "@/actions/dashboard";
+import { toast } from "sonner";
 
 export function CreateAccountDrawer({ children }) {
   const [open, setOpen] = useState(false);
@@ -42,9 +46,24 @@ export function CreateAccountDrawer({ children }) {
     },
   });
 
+ const {
+    loading: createAccountLoading,
+    fn: createAccountFn,
+    error,
+    data: newAccount,
+  } = useFetch(createAccount);
+
   const onSubmit = async (data) => {
-    console.log(data);
+    await createAccountFn(data);
   };
+
+  useEffect(() => {
+    if (newAccount) {
+      toast.success("Account created successfully");
+      reset();
+      setOpen(false);
+    }
+  }, [newAccount, reset]);
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
@@ -140,9 +159,19 @@ export function CreateAccountDrawer({ children }) {
                   Cancel
                 </Button>
               </DrawerClose>
-              <Button type="submit" className="flex-1">
-                Create Account
-
+              <Button
+                type="submit"
+                className="flex-1"
+                disabled={createAccountLoading}
+              >
+                {createAccountLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
               </Button>
             </div>
           </form>
