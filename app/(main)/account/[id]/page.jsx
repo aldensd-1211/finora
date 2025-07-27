@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { getAccountWithTransactions } from "@/actions/account";
 import { BarLoader } from "react-spinners";
 import { notFound } from "next/navigation";
-import { AccountChart } from "../_components/account-chart";
+import TransactionTable from "../_components/transaction-table";
 
 export default async function AccountPage({ params }) {
   const accountData = await getAccountWithTransactions(params.id);
@@ -44,11 +44,11 @@ export default async function AccountPage({ params }) {
       </Suspense> */}
 
       {/* Transactions Table */}
-      {/* <Suspense
+      <Suspense
         fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea" />}
       >
         <TransactionTable transactions={transactions} />
-      </Suspense> */}
+      </Suspense>
     </div>
   );
 }
