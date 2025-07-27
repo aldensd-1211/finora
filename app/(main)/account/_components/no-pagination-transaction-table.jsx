@@ -8,8 +8,6 @@ import {
   Trash,
   Search,
   X,
-  ChevronLeft,
-  ChevronRight,
   RefreshCw,
   Clock,
 } from "lucide-react";
@@ -61,7 +59,8 @@ const RECURRING_INTERVALS = {
   MONTHLY: "Monthly",
   YEARLY: "Yearly",
 };
-const TransactionTable = ({ transactions }) => {
+
+export function NoPaginationTransactionTable({ transactions }) {
   const [selectedIds, setSelectedIds] = useState([]);
   const [sortConfig, setSortConfig] = useState({
     field: "date",
@@ -70,8 +69,8 @@ const TransactionTable = ({ transactions }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [recurringFilter, setRecurringFilter] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const router = useRouter();
+
   // Memoized filtered and sorted transactions
   const filteredAndSortedTransactions = useMemo(() => {
     let result = [...transactions];
@@ -120,18 +119,6 @@ const TransactionTable = ({ transactions }) => {
 
     return result;
   }, [transactions, searchTerm, typeFilter, recurringFilter, sortConfig]);
-  // Pagination calculations
-  const totalPages = Math.ceil(
-    filteredAndSortedTransactions.length / ITEMS_PER_PAGE
-  );
-  const paginatedTransactions = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredAndSortedTransactions.slice(
-      startIndex,
-      startIndex + ITEMS_PER_PAGE
-    );
-  }, [filteredAndSortedTransactions, currentPage]);
-  const router = useRouter();
 
   const handleSort = (field) => {
     setSortConfig((current) => ({
@@ -140,6 +127,7 @@ const TransactionTable = ({ transactions }) => {
         current.field === field && current.direction === "asc" ? "desc" : "asc",
     }));
   };
+
   const handleSelect = (id) => {
     setSelectedIds((current) =>
       current.includes(id)
@@ -147,18 +135,21 @@ const TransactionTable = ({ transactions }) => {
         : [...current, id]
     );
   };
+
   const handleSelectAll = () => {
     setSelectedIds((current) =>
-      current.length === paginatedTransactions.length
+      current.length === filteredAndSortedTransactions.length
         ? []
-        : paginatedTransactions.map((t) => t.id)
+        : filteredAndSortedTransactions.map((t) => t.id)
     );
   };
+
   const {
     loading: deleteLoading,
     fn: deleteFn,
     data: deleted,
   } = useFetch(bulkDeleteTransactions);
+
   const handleBulkDelete = async () => {
     if (
       !window.confirm(
@@ -169,16 +160,18 @@ const TransactionTable = ({ transactions }) => {
 
     deleteFn(selectedIds);
   };
+
   useEffect(() => {
     if (deleted && !deleteLoading) {
       toast.error("Transactions deleted successfully");
     }
   }, [deleted, deleteLoading]);
+
   const handleClearFilters = () => {
     setSearchTerm("");
     setTypeFilter("");
     setRecurringFilter("");
-    setCurrentPage(1);
+    setSelectedIds([]);
   };
 
   return (
@@ -193,22 +186,13 @@ const TransactionTable = ({ transactions }) => {
           <Input
             placeholder="Search transactions..."
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8"
           />
         </div>
         <div className="flex gap-2">
-          <Select
-            value={typeFilter}
-            onValueChange={(value) => {
-              setTypeFilter(value);
-              setCurrentPage(1);
-            }}
-          >
-            <SelectTrigger className="w-[130px]">
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger>
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>
@@ -221,7 +205,6 @@ const TransactionTable = ({ transactions }) => {
             value={recurringFilter}
             onValueChange={(value) => {
               setRecurringFilter(value);
-              setCurrentPage(1);
             }}
           >
             <SelectTrigger className="w-[130px]">
@@ -259,6 +242,8 @@ const TransactionTable = ({ transactions }) => {
           )}
         </div>
       </div>
+
+      {/* Transactions Table */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -434,32 +419,6 @@ const TransactionTable = ({ transactions }) => {
           </TableBody>
         </Table>
       </div>
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm">
-            Page {currentPage} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
     </div>
   );
-};
-
-export default TransactionTable;
+}
