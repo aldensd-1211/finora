@@ -1,5 +1,7 @@
 import { db } from "@/lib/prisma";
 import { inngest } from "./client";
+import { sendEmail } from "@/actions/send-email";
+import EmailTemplate from "@/emails/template";
 
 // Budget Alerts with Event Batching
 export const checkBudgetAlerts = inngest.createFunction(
