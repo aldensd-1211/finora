@@ -18,12 +18,11 @@ export default function RootLayout({ children }) {
           <Header />
 
           <main className="min-h-screen">{children}</main>
-          <Toaster richColors/>
+          <Toaster richColors />
           <footer className="bg-blue-50 py-12">
             <div className="container mx-auto px-4 text-center text-gray-600">
               <p>
-                © 2025 Finora — Built by Alden Dcunha & Dinesh Jakhar. All
-                rights reserved.
+                © 2025 Finora — Built by Alden Dcunha. All rights reserved.
               </p>
             </div>
           </footer>
